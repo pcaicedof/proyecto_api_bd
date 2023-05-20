@@ -19,6 +19,7 @@ jobs:
           source venv/bin/activate
           export GOOGLE_APPLICATION_CREDENTIALS=$(python api_db/helpers/setter.py)
           pwd
+          cd api_db
           ls -l
       - name: Set up GCLOUD SDK
         uses: google-github-actions/setup-gcloud@v0.5.0
