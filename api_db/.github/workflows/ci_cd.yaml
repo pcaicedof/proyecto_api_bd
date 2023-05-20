@@ -12,14 +12,12 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Set environment and bring the model
+      - name: Set environment
         run: |
           pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
-          pip install dvc[gs]
-          export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
-          dvc pull model/model.pkl.dvc -r model-tracker
+          export GOOGLE_APPLICATION_CREDENTIALS=$(python helpers/setter.py)
       - name: Set up GCLOUD SDK
         uses: google-github-actions/setup-gcloud@master
         with:
