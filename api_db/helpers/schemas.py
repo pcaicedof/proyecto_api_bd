@@ -1,6 +1,6 @@
 #Python
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, date
 #Pydantic
 from pydantic import BaseModel, validator
 from pydantic import Field
@@ -16,13 +16,16 @@ class Payload(BaseModel):
     table: Tables = Field(...)
     data: List[dict]
 
+class RestorePayload(BaseModel):
+    table: Tables = Field(...)
+    backup_date: date = Field(..., example='2023-05-20')
+
 class Job(BaseModel):
     id: int
     job: str
 
     @validator('id')
     def validate_field1(cls, value):
-        # Realiza validaciones o transformaciones en el valor de field1
         if not isinstance(value, int):
             raise ValueError("El campo field2 debe ser un número entero")
         return value

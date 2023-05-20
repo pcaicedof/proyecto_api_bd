@@ -9,7 +9,7 @@ from fastapi import Body, Query, Path, Form, File, UploadFile
 from fastapi import status
 from fastapi import HTTPException
 
-from helpers.schemas import Payload
+from helpers.schemas import Payload, RestorePayload
 from helpers.constants import SCHEMA_QUERY, TABLE_QUERY, AVRO_SCHEMA, DELETE_TABLE_QUERY
 from helpers.utils import (
     get_dataframe_from_json,
@@ -63,10 +63,14 @@ def get_backup_from_db():
     path="/restoreBackup",
     status_code=status.HTTP_200_OK
 )
-def restore_backup_from_avro(table, date):
-    execute_query(DELETE_TABLE_QUERY.format(table=table))
+def restore_backup_from_avro(restore_payload: RestorePayload = Body(...)):
+    dict_restore = restore_payload.dict()
+    restore_table = dict_restore['table'].value
+    backup_date = dict_restore['backup_date']
+    print(backup_date)
+    execute_query(DELETE_TABLE_QUERY.format(table=restore_table))
     connection = connect_to_db()
-    file = f'./backup/{date}/{table}.avro'
+    file = f'./backup/{backup_date}/{restore_table}.avro'
     df_table = get_df_from_avro(file)
-    df_table.to_sql(table, connection, if_exists='replace', index=False)
+    df_table.to_sql(restore_table, connection, if_exists='replace', index=False)
     return print("ok")
