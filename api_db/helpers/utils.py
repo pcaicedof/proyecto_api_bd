@@ -1,7 +1,7 @@
 import json
 from pydantic import ValidationError
-from helpers.schemas import Job, Deparment, HiredEmployee
-from helpers.constants import DB_PATH
+from api_db.helpers.schemas import Job, Deparment, HiredEmployee
+from api_db.helpers.constants import DB_PATH
 import pandas as pd
 import sqlite3
 import fastavro

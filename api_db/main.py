@@ -9,9 +9,9 @@ from fastapi import Body, Query, Path, Form, File, UploadFile
 from fastapi import status
 from fastapi import HTTPException
 
-from helpers.schemas import Payload, RestorePayload
-from helpers.constants import SCHEMA_QUERY, TABLE_QUERY, AVRO_SCHEMA, DELETE_TABLE_QUERY
-from helpers.utils import (
+from api_db.helpers.schemas import Payload, RestorePayload
+from api_db.helpers.constants import SCHEMA_QUERY, TABLE_QUERY, AVRO_SCHEMA, DELETE_TABLE_QUERY
+from api_db.helpers.utils import (
     get_dataframe_from_json,
     connect_to_db,
     get_tables_from_db,
