@@ -5,7 +5,9 @@ FROM python:3.9
 WORKDIR /app
 
 # Copia los archivos de requerimientos y los instala
-COPY requirements.txt .
+COPY api_db/requirements.txt .
+
+COPY api_db/ ./api_db
 
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -16,4 +18,4 @@ COPY . .
 EXPOSE 8000
 
 # Inicia la aplicación cuando se ejecute el contenedor
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api_db.main:app", "--host", "0.0.0.0", "--port", "8000"]
