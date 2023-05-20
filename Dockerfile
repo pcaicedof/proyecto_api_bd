@@ -4,6 +4,8 @@ FROM python:3.9
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
+ENV PYTHONPATH=/api_db:/api_db/helpers
+
 # Copia los archivos de requerimientos y los instala
 COPY api_db/requirements.txt .
 
