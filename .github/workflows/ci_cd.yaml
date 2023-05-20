@@ -17,9 +17,9 @@ jobs:
           pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
-          export GOOGLE_APPLICATION_CREDENTIALS=$(python helpers/setter.py)
+          export GOOGLE_APPLICATION_CREDENTIALS=$(python api_db/helpers/setter.py)
       - name: Set up GCLOUD SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0.5.0
         with:
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
