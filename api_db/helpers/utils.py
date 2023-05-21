@@ -86,7 +86,7 @@ def get_df_from_avro(file):
     client = storage.Client()
     bucket = client.get_bucket(BUCKET_NAME)
     blob = bucket.blob(file)
-    temp_file = f"/tmp/{file}"
+    temp_file = f"/backup/{file}"
     blob.download_to_filename(temp_file)
     avro_file = open(temp_file, 'rb')
     avro_reader = fastavro.reader(avro_file)
