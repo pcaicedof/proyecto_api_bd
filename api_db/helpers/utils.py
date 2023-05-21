@@ -1,4 +1,3 @@
-import json
 from pydantic import ValidationError
 from api_db.helpers.schemas import Job, Deparment, HiredEmployee
 from api_db.helpers.constants import DB_PATH, BUCKET_NAME
@@ -29,8 +28,6 @@ def get_dataframe_from_json(dict_payload):
             validate_row(row, Deparment)
         elif dict_payload['table'].value == 'hired_employees':
             validate_row(row, HiredEmployee)
-        else:
-            print('no entra')
         if index_row == 1000:
             break
         row_list.append(row)
@@ -39,7 +36,6 @@ def get_dataframe_from_json(dict_payload):
 
 
 def connect_to_db():
-    print(DB_PATH)
     connection = sqlite3.connect(DB_PATH)
     return connection
 
@@ -82,7 +78,6 @@ def write_avro_to_gcs(df, table_name, avro_schema):
     os.remove(temp_file)
 
 def create_temp_file(folder_name, file):
-    print('entra a crear carpeta')
     temp_dir = folder_name
     os.makedirs(temp_dir, exist_ok=True)
     temp_file = os.path.join(temp_dir, file)
@@ -91,7 +86,6 @@ def create_temp_file(folder_name, file):
 def get_df_from_avro(backup_date, file):
     folder = f'backup/{backup_date}'
     temp_file = create_temp_file(folder, file)
-    print(f'este es el archivo {temp_file}')
     client = storage.Client()
     bucket = client.get_bucket(BUCKET_NAME)
     blob = bucket.blob(temp_file)

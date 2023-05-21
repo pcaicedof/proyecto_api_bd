@@ -1,11 +1,6 @@
-#Python
-from typing import Optional
-import json
-#pydantic
-from pydantic import ValidationError
 #FastAPI
 from fastapi import FastAPI
-from fastapi import Body, Query, Path, Form, File, UploadFile
+from fastapi import Body
 from fastapi import status
 from fastapi import HTTPException
 
@@ -18,6 +13,7 @@ from api_db.helpers.utils import (
     get_df_from_avro,
     execute_query,
     write_avro_to_gcs)
+
 
 app = FastAPI()
 
@@ -40,9 +36,14 @@ def migrate_tables(payload: Payload = Body(...)):
     df_table = get_dataframe_from_json(dict_payload)
     connection = connect_to_db()
     table_name = dict_payload['table'].value
-    df_table.to_sql(table_name, connection, if_exists='replace', index=False)
+    try:
+        df_table.to_sql(table_name, connection, if_exists='replace', index=False)
+        status = 'ok'
+    except Exception as e:
+        status = 'failed'
     connection.close()
-    return payload
+    response = {table_name: status}
+    return response
 
 @app.post(
     path="/createBackup",
@@ -50,12 +51,18 @@ def migrate_tables(payload: Payload = Body(...)):
 )
 def get_backup_from_db():
     df_table_list = get_tables_from_db(SCHEMA_QUERY)
+    response = {}
     for index, row in df_table_list.iterrows():
         table = row['name']
         final_query_table = TABLE_QUERY.format(table=table)
         df_table = get_tables_from_db(final_query_table)
-        write_avro_to_gcs(df_table, table, AVRO_SCHEMA[table])
-    return print("ok")
+        try:
+            write_avro_to_gcs(df_table, table, AVRO_SCHEMA[table])
+            status = 'ok'
+        except Exception as e:
+            status = 'failed'
+        response[table] = status
+    return response
 
 @app.post(
     path="/restoreBackup",
@@ -69,5 +76,10 @@ def restore_backup_from_avro(restore_payload: RestorePayload = Body(...)):
     connection = connect_to_db()
     file = f'{restore_table}.avro'
     df_table = get_df_from_avro(backup_date, file)
-    df_table.to_sql(restore_table, connection, if_exists='replace', index=False)
+    try:
+        df_table.to_sql(restore_table, connection, if_exists='replace', index=False)
+        status = 'ok'
+    except Exception as e:
+        status = 'failed'
+    response = {restore_table: status}
     return print("ok")
