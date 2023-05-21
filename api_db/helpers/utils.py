@@ -62,38 +62,6 @@ def get_tables_from_db(query):
     df = pd.DataFrame(rows, columns=columns)
     return df
 
-"""
-def get_folders():
-    rootdir = './backup'
-    folder_list = os.listdir(rootdir)
-    for idx, file in enumerate(folder_list):
-        folder_path = os.path.join(rootdir, file)
-        if os.path.isdir(folder_path):
-            folder_name = folder_path.replace(rootdir+'/', '')
-            folder_number = idx + 1
-            print(f'{folder_number}. {folder_name}')
-    return folder_list
-
-def create_folder(name):
-    path = f'./backup/{name}'
-    os.makedirs(path)
-    return path
-
-def get_avro_file_from_df(df,table_name, avro_schema):
-    data = df.to_dict('records')
-    schema = {
-    'type': 'record',
-    'name': 'YourSchemaName',
-    'fields': avro_schema
-        }
-    folder_list = get_folders()
-    date_folder = datetime.now().date()
-    if date_folder in folder_list:
-        path = create_folder(date_folder)
-    path = f'./backup/{date_folder}'
-    with open(f'{path}/{table_name}.avro', 'wb') as avro_file:
-        fastavro.writer(avro_file, schema, data)
-"""
 
 def write_avro_to_gcs(df, table_name, avro_schema):
     client = storage.Client()
@@ -115,11 +83,17 @@ def write_avro_to_gcs(df, table_name, avro_schema):
     
 
 def get_df_from_avro(file):
-    avro_file = open(file, 'rb')
+    client = storage.Client()
+    bucket = client.get_bucket(BUCKET_NAME)
+    blob = bucket.blob(file)
+    temp_file = f"/tmp/{file}"
+    blob.download_to_filename(temp_file)
+    avro_file = open(temp_file, 'rb')
     avro_reader = fastavro.reader(avro_file)
     records = []
     for record in avro_reader:
         records.append(record)
     df = pd.DataFrame(records)
     avro_file.close()
+    os.remove(temp_file)
     return df
