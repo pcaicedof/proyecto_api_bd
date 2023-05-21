@@ -42,7 +42,7 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
       - name: Create zip file
         run: |
-          zip -r consume_api.zip /consume_api
+          zip -r consume_api.zip ./consume_api
       - name: Copy folder to GCS
         run: |
           gsutil cp consume_api.zip  gs://github-code-globant/
