@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from api_db.helpers.schemas import Payload, RestorePayload
 from api_db.helpers.constants import (
     SCHEMA_QUERY, TABLE_QUERY, AVRO_SCHEMA, DELETE_TABLE_QUERY,
-    GCP_PROJECT_ID, GCP_DATASET)
+    GCP_PROJECT_ID, GCP_DATASET, EMPLOYEES_BY_QUARTER, GCP_REPORT_DATASET)
 from api_db.helpers.utils import (
     get_dataframe_from_json,
     connect_to_db,
@@ -15,7 +15,8 @@ from api_db.helpers.utils import (
     get_df_from_avro,
     execute_query,
     write_avro_to_gcs,
-    write_to_bq_from_df)
+    write_to_bq_from_df,
+    create_df_from_query)
 
 
 app = FastAPI()
@@ -86,4 +87,21 @@ def restore_backup_from_avro(restore_payload: RestorePayload = Body(...)):
     except Exception as e:
         status = 'failed'
     response = {restore_table: status}
+    return response
+
+@app.get(
+    path="/reports/employees_quarter/{year}",
+    status_code=status.HTTP_200_OK
+)
+def create_report(
+    year: int = Path(
+    ...,
+    gt=2000,
+    lt=2025,
+    title= "year to be queried",
+    example=2021
+    )
+):
+    df_report = create_df_from_query(EMPLOYEES_BY_QUARTER.format(year=year))
+    write_to_bq_from_df(GCP_PROJECT_ID, GCP_REPORT_DATASET, 'employees_by_quarter', df_report)
     return response

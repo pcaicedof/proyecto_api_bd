@@ -1,7 +1,6 @@
 from pydantic import ValidationError
 from api_db.helpers.schemas import Job, Deparment, HiredEmployee
-from api_db.helpers.constants import (
-    DB_PATH, BUCKET_NAME, GCP_PROJECT_ID, GCP_DATASET)
+from api_db.helpers.constants import DB_PATH, BUCKET_NAME
 import pandas as pd
 import sqlite3
 import fastavro
@@ -115,3 +114,9 @@ def write_to_bq_from_df(project, dataset, table_name, df):
                                             ).result()
     except Exception as e:
         print(e)
+
+def create_df_from_query(query):
+    bq_client = bq.Client(project=project)
+    table = bq_client.query(query)
+    df_table = table.to_dataframe()
+    return df_table
