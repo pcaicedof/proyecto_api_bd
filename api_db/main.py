@@ -67,7 +67,7 @@ def restore_backup_from_avro(restore_payload: RestorePayload = Body(...)):
     backup_date = dict_restore['backup_date']
     execute_query(DELETE_TABLE_QUERY.format(table=restore_table))
     connection = connect_to_db()
-    file = f'{backup_date}/{restore_table}.avro'
-    df_table = get_df_from_avro(file)
+    file = f'{restore_table}.avro'
+    df_table = get_df_from_avro(backup_date, file)
     df_table.to_sql(restore_table, connection, if_exists='replace', index=False)
     return print("ok")

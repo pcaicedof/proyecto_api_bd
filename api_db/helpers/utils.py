@@ -80,13 +80,21 @@ def write_avro_to_gcs(df, table_name, avro_schema):
     blob = bucket.blob(file_name)
     blob.upload_from_filename(temp_file)
     os.remove(temp_file)
-    
 
-def get_df_from_avro(file):
+def create_temp_file(folder_name, file):
+    print('entra a crear carpeta')
+    temp_dir = folder_name
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = os.path.join(temp_dir, file)
+    return temp_file
+
+def get_df_from_avro(backup_date, file):
+    folder = f'backup/{backup_date}'
+    temp_file = create_temp_file(folder, file)
+    print(f'este es el archivo {temp_file}')
     client = storage.Client()
     bucket = client.get_bucket(BUCKET_NAME)
-    blob = bucket.blob(file)
-    temp_file = f"/backup/{file}"
+    blob = bucket.blob(temp_file)
     blob.download_to_filename(temp_file)
     avro_file = open(temp_file, 'rb')
     avro_reader = fastavro.reader(avro_file)
