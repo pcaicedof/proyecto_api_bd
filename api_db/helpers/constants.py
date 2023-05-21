@@ -1,4 +1,4 @@
-DB_PATH = './db/company.db'
+DB_PATH = '/app/api_db/db/company.db'
 
 SCHEMA_QUERY = """
     SELECT 

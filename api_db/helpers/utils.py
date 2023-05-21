@@ -19,7 +19,6 @@ def get_dataframe_from_json(dict_payload):
     json_data = dict_payload['data']
     row_list = []
     for index_row, data in enumerate(json_data):
-        print(f'migrando registro {index_row}')
         row = json_data[index_row]
         if dict_payload['table'].value == 'jobs':
             validate_row(row, Job)
@@ -37,6 +36,7 @@ def get_dataframe_from_json(dict_payload):
 
 
 def connect_to_db():
+    print(DB_PATH)
     connection = sqlite3.connect(DB_PATH)
     return connection
 

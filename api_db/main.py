@@ -53,10 +53,8 @@ def get_backup_from_db():
     for index, row in df_table_list.iterrows():
         table = row['name']
         final_query_table = TABLE_QUERY.format(table=table)
-        print(final_query_table)
         df_table = get_tables_from_db(final_query_table)
         get_avro_file_from_df(df_table, table, AVRO_SCHEMA[table])
-        print(df_table)
     return print("ok")
 
 @app.post(
@@ -67,7 +65,6 @@ def restore_backup_from_avro(restore_payload: RestorePayload = Body(...)):
     dict_restore = restore_payload.dict()
     restore_table = dict_restore['table'].value
     backup_date = dict_restore['backup_date']
-    print(backup_date)
     execute_query(DELETE_TABLE_QUERY.format(table=restore_table))
     connection = connect_to_db()
     file = f'./backup/{backup_date}/{restore_table}.avro'
