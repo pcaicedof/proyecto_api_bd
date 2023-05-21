@@ -1,12 +1,14 @@
 from pydantic import ValidationError
 from api_db.helpers.schemas import Job, Deparment, HiredEmployee
-from api_db.helpers.constants import DB_PATH, BUCKET_NAME
+from api_db.helpers.constants import (
+    DB_PATH, BUCKET_NAME, GCP_PROJECT_ID, GCP_DATASET)
 import pandas as pd
 import sqlite3
 import fastavro
 import os
 from datetime import datetime
 from google.cloud import storage
+from google.cloud import bigquery as bq
 import os
 
 
@@ -99,3 +101,17 @@ def get_df_from_avro(backup_date, file):
     avro_file.close()
     os.remove(temp_file)
     return df
+
+def write_to_bq_from_df(project, dataset, table_name, df):
+    bq_client = bq.Client(project=project)
+    dataset_ref = bq_client.dataset(dataset)
+    table_ref = dataset_ref.table(table_name)
+    job_config = bq.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+
+    try:
+        bq_client.load_table_from_dataframe(df,
+                                            table_ref,
+                                            job_config=job_config
+                                            ).result()
+    except Exception as e:
+        print(e)
