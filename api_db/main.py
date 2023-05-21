@@ -15,9 +15,9 @@ from api_db.helpers.utils import (
     get_dataframe_from_json,
     connect_to_db,
     get_tables_from_db,
-    get_avro_file_from_df,
     get_df_from_avro,
-    execute_query)
+    execute_query,
+    write_avro_to_gcs)
 
 app = FastAPI()
 
@@ -54,7 +54,7 @@ def get_backup_from_db():
         table = row['name']
         final_query_table = TABLE_QUERY.format(table=table)
         df_table = get_tables_from_db(final_query_table)
-        get_avro_file_from_df(df_table, table, AVRO_SCHEMA[table])
+        write_avro_to_gcs(df_table, table, AVRO_SCHEMA[table])
     return print("ok")
 
 @app.post(

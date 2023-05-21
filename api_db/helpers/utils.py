@@ -1,12 +1,15 @@
 import json
 from pydantic import ValidationError
 from api_db.helpers.schemas import Job, Deparment, HiredEmployee
-from api_db.helpers.constants import DB_PATH
+from api_db.helpers.constants import DB_PATH, BUCKET_NAME
 import pandas as pd
 import sqlite3
 import fastavro
 import os
 from datetime import datetime
+from google.cloud import storage
+import os
+
 
 def validate_row(row, model):
     try:
@@ -59,6 +62,7 @@ def get_tables_from_db(query):
     df = pd.DataFrame(rows, columns=columns)
     return df
 
+"""
 def get_folders():
     rootdir = './backup'
     folder_list = os.listdir(rootdir)
@@ -89,6 +93,26 @@ def get_avro_file_from_df(df,table_name, avro_schema):
     path = f'./backup/{date_folder}'
     with open(f'{path}/{table_name}.avro', 'wb') as avro_file:
         fastavro.writer(avro_file, schema, data)
+"""
+
+def write_avro_to_gcs(df, table_name, avro_schema):
+    client = storage.Client()
+    bucket = client.get_bucket(BUCKET_NAME)
+    data = df.to_dict('records')
+    schema = {
+    'type': 'record',
+    'name': 'YourSchemaName',
+    'fields': avro_schema
+        }
+    temp_file = f'/tmp/{table_name}.avro'
+    with open(temp_file, "wb") as avro_file:
+        fastavro.writer(avro_file, schema, data)
+    date_folder = datetime.now().date()
+    file_name = f'backup/{date_folder}/{table_name}.avro'
+    blob = bucket.blob(file_name)
+    blob.upload_from_filename(temp_file)
+    os.remove(temp_file)
+    
 
 def get_df_from_avro(file):
     avro_file = open(file, 'rb')

@@ -1,4 +1,4 @@
-DB_PATH = '/app/api_db/db/company.db'
+DB_PATH = './api_db/db/company.db'
 
 SCHEMA_QUERY = """
     SELECT 
@@ -34,3 +34,5 @@ AVRO_SCHEMA = {
 DELETE_TABLE_QUERY = """
     delete from {table}
 """
+
+BUCKET_NAME = 'prueba-globant'
