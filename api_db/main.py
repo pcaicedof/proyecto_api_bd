@@ -102,6 +102,6 @@ def create_report(
     example=2021
     )
 ):
-    df_report = create_df_from_query(EMPLOYEES_BY_QUARTER.format(year=year))
+    df_report = create_df_from_query(EMPLOYEES_BY_QUARTER.format(year=year), GCP_PROJECT_ID)
     write_to_bq_from_df(GCP_PROJECT_ID, GCP_REPORT_DATASET, 'employees_by_quarter', df_report)
     return response

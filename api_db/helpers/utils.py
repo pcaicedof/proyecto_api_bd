@@ -115,7 +115,7 @@ def write_to_bq_from_df(project, dataset, table_name, df):
     except Exception as e:
         print(e)
 
-def create_df_from_query(query):
+def create_df_from_query(query, project):
     bq_client = bq.Client(project=project)
     table = bq_client.query(query)
     df_table = table.to_dataframe()
