@@ -3,6 +3,10 @@
 ## Description
 This project aims to create an API that allows execute several functionalities required by Globant including: Data migration, create backup from a database in avro format, restore a database from avro files, create reports.
 
+## Arquitecture
+
+![Architecture](/proyecto_api_bd/images/architecture.jpeg)
+
 ## API Features
 
 - **Migrate data**: The API allows users migrate a database by csv files uploading to a google cloud storage bucket. Once a file is upload, a cloud function is triggered in order to build a payload and consume the API and execute the endpoint to migrate data to the company database.
