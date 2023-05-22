@@ -5,9 +5,12 @@ from fastapi import status
 from fastapi import HTTPException
 
 from api_db.helpers.schemas import Payload, RestorePayload, Reports
-from api_db.helpers.constants import (
-    SCHEMA_QUERY, TABLE_QUERY, AVRO_SCHEMA, DELETE_TABLE_QUERY,
-    GCP_PROJECT_ID, GCP_DATASET, EMPLOYEES_BY_QUARTER, GCP_REPORT_DATASET)
+from api_db.helpers.constants import (AVRO_SCHEMA, GCP_PROJECT_ID,
+                                      GCP_DATASET, GCP_REPORT_DATASET)
+
+from api_db.helpers.queries import (SCHEMA_QUERY, TABLE_QUERY,
+                                    DELETE_TABLE_QUERY, EMPLOYEES_BY_QUARTER,
+                                    EMPLOYEES_BY_DEPT)
 from api_db.helpers.utils import (
     get_dataframe_from_json,
     connect_to_db,
@@ -109,8 +112,11 @@ def create_report_employees(
 
     if report.value == 'employees_by_quarter':
         query_report = EMPLOYEES_BY_QUARTER
+    elif report.value == 'employees_by_department':
+        query_report = EMPLOYEES_BY_DEPT
 
-    df_report = create_df_from_query(query_report.format(year=year), GCP_PROJECT_ID)
+    final_query = query_report.format(year=year, project=GCP_PROJECT_ID, dataset=GCP_DATASET)
+    df_report = create_df_from_query(final_query, GCP_PROJECT_ID)
     try:
         write_to_bq_from_df(GCP_PROJECT_ID, GCP_REPORT_DATASET, 'employees_by_quarter', df_report)
         status = 'ok'
