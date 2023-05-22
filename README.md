@@ -5,7 +5,7 @@ This project aims to create an API that allows execute several functionalities r
 
 ## Arquitecture
 
-![Architecture](/proyecto_api_bd/images/architecture.jpeg)
+![Architecture](/images/architecture.jpeg)
 
 ## API Features
 
