@@ -12,6 +12,10 @@ class Tables(Enum):
     jobs = "jobs"
     departments = "departments"
 
+class Reports(Enum):
+    employees_by_quarter = "employees_by_quarter"
+    employees_by_department= "employees_by_department"
+
 class Payload(BaseModel):
     table: Tables = Field(...)
     data: List[dict]
