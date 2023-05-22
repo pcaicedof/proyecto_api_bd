@@ -44,7 +44,7 @@ class ConsumeApi():
         return payload
 
     
-def main(event):
+def main(event, context):
     consumer = ConsumeApi(
         event = event
     )
@@ -52,8 +52,3 @@ def main(event):
     payload = consumer.get_payload()
     response = send_payload(payload, url)
     return response
-
-
-event = {'bucket': 'prueba-globant', 'contentType': 'text/csv', 'crc32c': '0o8bEg==', 'etag': 'CN+DxtOHhf8CEAE=', 'generation': '1684625666703839', 'id': 'prueba-globant/files_to_migrate/jobs.csv/1684625666703839', 'kind': 'storage#object', 'md5Hash': 'qAxjXipEea9z5x/FWLjQFA==', 'mediaLink': 'https://storage.googleapis.com/download/storage/v1/b/prueba-globant/o/files_to_migrate%2Fjobs.csv?generation=1684625666703839&alt=media', 'metageneration': '1', 'name': 'files_to_migrate/jobs.csv', 'selfLink': 'https://www.googleapis.com/storage/v1/b/prueba-globant/o/files_to_migrate%2Fjobs.csv', 'size': '4419', 'storageClass': 'STANDARD', 'timeCreated': '2023-05-20T23:34:26.788Z', 'timeStorageClassUpdated': '2023-05-20T23:34:26.788Z', 'updated': '2023-05-20T23:34:26.788Z'}
-response = main(event)
-print(response)

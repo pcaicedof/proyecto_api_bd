@@ -1,12 +1,15 @@
-import json
 from pydantic import ValidationError
 from api_db.helpers.schemas import Job, Deparment, HiredEmployee
-from api_db.helpers.constants import DB_PATH
+from api_db.helpers.constants import DB_PATH, BUCKET_NAME
 import pandas as pd
 import sqlite3
 import fastavro
 import os
 from datetime import datetime
+from google.cloud import storage
+from google.cloud import bigquery as bq
+import os
+
 
 def validate_row(row, model):
     try:
@@ -19,7 +22,6 @@ def get_dataframe_from_json(dict_payload):
     json_data = dict_payload['data']
     row_list = []
     for index_row, data in enumerate(json_data):
-        print(f'migrando registro {index_row}')
         row = json_data[index_row]
         if dict_payload['table'].value == 'jobs':
             validate_row(row, Job)
@@ -27,8 +29,6 @@ def get_dataframe_from_json(dict_payload):
             validate_row(row, Deparment)
         elif dict_payload['table'].value == 'hired_employees':
             validate_row(row, HiredEmployee)
-        else:
-            print('no entra')
         if index_row == 1000:
             break
         row_list.append(row)
@@ -59,43 +59,64 @@ def get_tables_from_db(query):
     df = pd.DataFrame(rows, columns=columns)
     return df
 
-def get_folders():
-    rootdir = './backup'
-    folder_list = os.listdir(rootdir)
-    for idx, file in enumerate(folder_list):
-        folder_path = os.path.join(rootdir, file)
-        if os.path.isdir(folder_path):
-            folder_name = folder_path.replace(rootdir+'/', '')
-            folder_number = idx + 1
-            print(f'{folder_number}. {folder_name}')
-    return folder_list
 
-def create_folder(name):
-    path = f'./backup/{name}'
-    os.makedirs(path)
-    return path
-
-def get_avro_file_from_df(df,table_name, avro_schema):
+def write_avro_to_gcs(df, table_name, avro_schema):
+    client = storage.Client()
+    bucket = client.get_bucket(BUCKET_NAME)
     data = df.to_dict('records')
     schema = {
     'type': 'record',
     'name': 'YourSchemaName',
     'fields': avro_schema
         }
-    folder_list = get_folders()
-    date_folder = datetime.now().date()
-    if date_folder in folder_list:
-        path = create_folder(date_folder)
-    path = f'./backup/{date_folder}'
-    with open(f'{path}/{table_name}.avro', 'wb') as avro_file:
+    temp_file = f'/tmp/{table_name}.avro'
+    with open(temp_file, "wb") as avro_file:
         fastavro.writer(avro_file, schema, data)
+    date_folder = datetime.now().date()
+    file_name = f'backup/{date_folder}/{table_name}.avro'
+    blob = bucket.blob(file_name)
+    blob.upload_from_filename(temp_file)
+    os.remove(temp_file)
 
-def get_df_from_avro(file):
-    avro_file = open(file, 'rb')
+def create_temp_file(folder_name, file):
+    temp_dir = folder_name
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = os.path.join(temp_dir, file)
+    return temp_file
+
+def get_df_from_avro(backup_date, file):
+    folder = f'backup/{backup_date}'
+    temp_file = create_temp_file(folder, file)
+    client = storage.Client()
+    bucket = client.get_bucket(BUCKET_NAME)
+    blob = bucket.blob(temp_file)
+    blob.download_to_filename(temp_file)
+    avro_file = open(temp_file, 'rb')
     avro_reader = fastavro.reader(avro_file)
     records = []
     for record in avro_reader:
         records.append(record)
     df = pd.DataFrame(records)
     avro_file.close()
+    os.remove(temp_file)
     return df
+
+def write_to_bq_from_df(project, dataset, table_name, df):
+    bq_client = bq.Client(project=project)
+    dataset_ref = bq_client.dataset(dataset)
+    table_ref = dataset_ref.table(table_name)
+    job_config = bq.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+
+    try:
+        bq_client.load_table_from_dataframe(df,
+                                            table_ref,
+                                            job_config=job_config
+                                            ).result()
+    except Exception as e:
+        print(e)
+
+def create_df_from_query(query, project):
+    bq_client = bq.Client(project=project)
+    table = bq_client.query(query)
+    df_table = table.to_dataframe()
+    return df_table

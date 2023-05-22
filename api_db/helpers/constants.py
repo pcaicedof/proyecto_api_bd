@@ -1,17 +1,4 @@
-DB_PATH = './db/company.db'
-
-SCHEMA_QUERY = """
-    SELECT 
-        name
-    FROM 
-        sqlite_schema
-    WHERE type = 'table'
-"""
-
-TABLE_QUERY = """
-select *
-from {table}
-"""
+DB_PATH = '/app/api_db/db/company.db'
 
 AVRO_SCHEMA = {
     'jobs': [
@@ -31,6 +18,10 @@ AVRO_SCHEMA = {
     ]
 }
 
-DELETE_TABLE_QUERY = """
-    delete from {table}
-"""
+GCP_PROJECT_ID = "prueba-globant"
+
+GCP_DATASET = "company"
+
+GCP_REPORT_DATASET = 'reports'
+
+BUCKET_NAME = 'prueba-globant'
