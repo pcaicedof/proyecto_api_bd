@@ -109,19 +109,19 @@ def create_report_employees(
     title= "Name of the report to get"
     )
 ):
-
-    if report.value == 'employees_by_quarter':
+    report_table = report.value 
+    if report_table== 'employees_by_quarter':
         query_report = EMPLOYEES_BY_QUARTER
-    elif report.value == 'employees_by_department':
+    elif report_table == 'employees_by_department':
         query_report = EMPLOYEES_BY_DEPT
 
     final_query = query_report.format(year=year, project=GCP_PROJECT_ID, dataset=GCP_DATASET)
     df_report = create_df_from_query(final_query, GCP_PROJECT_ID)
     try:
-        write_to_bq_from_df(GCP_PROJECT_ID, GCP_REPORT_DATASET, 'employees_by_quarter', df_report)
+        write_to_bq_from_df(GCP_PROJECT_ID, GCP_REPORT_DATASET, report_table, df_report)
         status = 'ok'
     except Exception as e:
         status = 'failed'
         print(e)
-    response = {'report': status}
+    response = {report_table: status}
     return response
