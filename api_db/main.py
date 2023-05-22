@@ -1,6 +1,6 @@
 #FastAPI
 from fastapi import FastAPI
-from fastapi import Body
+from fastapi import Body, Path
 from fastapi import status
 from fastapi import HTTPException
 

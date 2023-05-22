@@ -81,4 +81,4 @@ FROM (
       'Q3',
       'Q4'))
       order by department, job
-""".FORMAT(project=GCP_PROJECT_ID, dataset=GCP_DATASET)
+""".format(project=GCP_PROJECT_ID, dataset=GCP_DATASET)
